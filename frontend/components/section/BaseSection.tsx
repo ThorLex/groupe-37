@@ -1,5 +1,6 @@
 import Image from "next/image"
 import NavButton from "../macro-element/NavButton"
+import Link from "next/link"
 
 const BaseSection = () => {
   return (
@@ -20,19 +21,23 @@ const BaseSection = () => {
         <p className="mt-4 text-xl">Etablissez facilement votre CNI au Cameroun et suivez votre demande en toute simplicité.</p>
         
         <div className="mt-12 font-[family-name:var(--font-audiowided)]">
-            <NavButton 
+            <Link href={"/pre-enrolement"}>
+              <NavButton 
                 variant={"primary"} 
                 className="text-xl font-extralight py-1.5 px-4 cursor-pointer"
                 animation="pulse"
-            >
+              >
                 Commencer ici
-            </NavButton>
-            <NavButton 
+              </NavButton>
+            </Link>
+            <Link href={"/suivi"}>
+              <NavButton 
                 variant={"outline"}
                 className="relative text-base font-extralight py-1.5 ml-4"
-            >
+              >
                 Consulter le statut
-            </NavButton>
+              </NavButton>
+            </Link>
         </div>
       </div>
     </section>
