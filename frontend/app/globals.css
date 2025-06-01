@@ -16,3 +16,20 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+.progress {
+  &::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0.1rem;
+    left: 0;
+    bottom: 0;
+    transition: width 0.5s ease-in-out;
+  }
+
+  &:hover::after {
+    width: 100%;
+    background-color: white;
+  }
+}

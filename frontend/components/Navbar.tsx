@@ -17,7 +17,7 @@ const Navbar = () => {
                 <Link href={"/"}>IDExpress</Link>
             </div>
 
-            <div className="flex justify-between px-4 items-center w-1/3 mr-6">
+            <div className="flex justify-between px-3 items-center w-1/3 mr-6">
                 <NavButton>PRE ENROLEMENT</NavButton>
                 <NavButton>SUIVI DE DEMANDE</NavButton>
                 <NavButton variant={"language"} onClick={toggleLanguage}>{language}</NavButton>
