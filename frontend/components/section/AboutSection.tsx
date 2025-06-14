@@ -28,12 +28,15 @@ const AboutSection = () => {
           Notre mission est de rendre l&lsquo;accès à l&lsquo;identification plus simple, rapide et sécurisé pour
           tous les citoyens, en offrant un service en ligne clair, transparent et efficace.
         </p>
-        <p className="text-gray-600 mb-2 leading-relaxed text-justify">
-            Grâce à IDExpress, vous pouvez:
-            <li className="ml-4">Initier votre demande de CNI en ligne</li>
-            <li className="ml-4">Suivre en temps réel l&lsquo;évolution de votre dossier</li>
-            <li className="ml-4">Réduire les déplacements et les longues files d&lsquo;attente</li>
-        </p>
+        <div className="text-gray-600 mb-6 leading-relaxed text-justify">
+          <p>Grâce à IDExpress, vous pouvez :</p>
+          <ul className="list-disc list-inside ml-4 space-y-2">
+            <li>Initier votre demande de CNI en ligne</li>
+            <li>Suivre en temps réel l’évolution de votre dossier</li>
+            <li>Réduire les déplacements et les longues files d’attente</li>
+          </ul>
+        </div>
+
         <p className="text-gray-600 mb-1 leading-relaxed text-justify">
           Nous sommes une équipe de jeunes professionnels camerounais passionnées par la technologie et 
           engagés pour une administration plus accessible à tous.

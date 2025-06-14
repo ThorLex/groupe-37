@@ -16,11 +16,11 @@ const BaseSection = () => {
       
       <div className="absolute inset-0 bg-black/10 z-0" />
       
-      <div className="relative pl-10  z-10 flex h-full flex-col items-start justify-center w-[48%] text-white font-[family-name:var(--font-opensans)]">
-        <h1 className="text-5xl font-bold">Bienvenue sur IDExpress</h1>
-        <p className="mt-4 text-xl">Etablissez facilement votre CNI au Cameroun et suivez votre demande en toute simplicité.</p>
+      <div className="relative items-center pt-[40%] md:pt-0 md:pl-10  z-10 flex h-full flex-col md:items-start md:justify-center md:w-[48%] text-white font-[family-name:var(--font-opensans)]">
+        <h1 className="max-md:text-center text-5xl font-bold">Bienvenue sur IDExpress</h1>
+        <p className="mt-4 text-xl max-md:text-center">Etablissez facilement votre CNI au Cameroun et suivez votre demande en toute simplicité.</p>
         
-        <div className="mt-12 font-[family-name:var(--font-audiowided)]">
+        <div className="flex flex-col md:flex-row mt-12 font-[family-name:var(--font-audiowided)]">
             <Link href={"/pre-enrolement"}>
               <NavButton 
                 variant={"primary"} 
@@ -33,7 +33,7 @@ const BaseSection = () => {
             <Link href={"/suivi"}>
               <NavButton 
                 variant={"outline"}
-                className="relative text-base font-extralight py-1.5 ml-4"
+                className="relative text-base font-extralight md:py-1.5 ml-3 md:ml-4 max-md:pt-4"
               >
                 Consulter le statut
               </NavButton>

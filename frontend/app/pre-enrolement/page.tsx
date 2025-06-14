@@ -20,7 +20,7 @@ function showErrorsWithDelay(errors: { [key: string]: any }, fields: (keyof PreE
     if (error?.message) {
       setTimeout(() => {
         toast.error(`${field}: ${error.message}`, {
-          duration: 3500,
+          duration: 1500,
           id: `error-${field}-${index}`,
         })
       }, index * delayBetween)

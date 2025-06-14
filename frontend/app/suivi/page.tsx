@@ -36,8 +36,8 @@ const StatusPage = () => {
       </section>
 
       <main className='flex justify-center'>
-          <div className='bg-gray-100 rounded-xl shadow-lg p-6 w-full max-w-8/12 mb-8'>
-            <div className='flex sm:flex-row flex-col sm:space-x-6'>
+          <div className='bg-gray-100 rounded-xl shadow-lg p-6 w-full max-w-11/12 md:max-w-8/12 mb-8'>
+            <div className='flex sm:flex-row flex-col sm:space-x-6 max-sm:items-center'>
               <div className='shrink-0 mb-4 h-40 w-38 relative sm:mb-0'>
                 <Image
                   src="/4.png"
@@ -47,13 +47,13 @@ const StatusPage = () => {
                 />
               </div>
               {data ? (
-                <div className="flex-grow text-gray-900 ml-3">
+                <div className="flex-grow text-gray-900 sm:ml-3">
                   <p><span className="font-semibold">N° demande:</span> <span className='font-bold'>{data.requestNumber}</span></p>
                   <p className="mt-5"><span className="font-semibold">Noms:</span> <span className='font-bold'>{data.lastName}</span> </p>
                   <p className="mt-5"><span className="font-semibold">Prénoms:</span> <span className='font-bold'>{data.firstName}</span></p>
                   <p className="mt-5"><span className="font-semibold">Date de soumission:</span> <span className='font-bold'>{data.submissionDate}</span></p>
                   <p className="mt-5 text-gray-400"><span className="font-semibold">Date de biométrie:</span> <span className='font-bold'>{data.biometricsDate}</span> ({data.biometricsStatus})</p>
-                  <p className="mt-5"><span className="font-semibold">Date de retrait de la CNI:</span> <span className='font-bold'>{data.pickupDate}</span></p>
+                  <p className="mt-5"><span className="font-semibold">Date de retrait CNI:</span> <span className='font-bold'>{data.pickupDate}</span></p>
                 </div>
               ) : error ? (
                 <> 
