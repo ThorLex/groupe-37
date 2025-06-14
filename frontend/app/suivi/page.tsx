@@ -7,7 +7,7 @@ import { useState } from 'react'
 const mockData = {
   requestNumber: 'LT/A/22/03/25/00001',
   lastName: 'ATANGANA',
-  firstName: 'Jean Pierre',
+  firstName: 'Jean Paul',
   submissionDate: '22/03/2025',
   biometricsDate: '04/04/2025',
   biometricsStatus: 'en attente',
