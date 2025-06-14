@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+:root {
+  --background: linear-gradient(to right, #1E3A5F, #4A6FA5);
+  --foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.progress {
+  &::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0.1rem;
+    left: 0;
+    bottom: 0;
+    transition: width 0.5s ease-in-out;
+  }
+
+  &:hover::after {
+    width: 100%;
+    background-color: white;
+  }
+}
