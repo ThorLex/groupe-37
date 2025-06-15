@@ -1,0 +1,40 @@
+{
+  "name": "groupe-37-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "user-service": "cross-env NODE_ENV=development node --max-old-space-size=2048 user-service/src/index.js",
+    "admin-service": "cross-env NODE_ENV=development node --max-old-space-size=2048 admin-service/src/index.js",
+    "payment-notification-service": "cross-env NODE_ENV=development node --max-old-space-size=2048 payment-notification-service/src/index.js",
+    "file-service": "cross-env NODE_ENV=development node --max-old-space-size=2048 file-service/src/index.js",
+    "dev": "concurrently \"npm run user-service\" \"npm run admin-service\" \"npm run payment-notification-service\" \"npm run file-service\"",
+    "start": "cross-env NODE_ENV=production node --max-old-space-size=4096 server.js",
+    "test": "vitest",
+    "lint": "eslint .",
+    "pm2-setup": "pm2 start ecosystem.config.js && pm2 save && pm2 startup",
+    "local": "cross-env NODE_ENV=development env-cmd -f .env npm run dev",
+    "prod": "cross-env NODE_ENV=production env-cmd -f .env.prod npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "env-cmd": "^10.1.0",
+    "eslint": "^8.56.0",
+    "pm2": "^5.3.0",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.17.0",
+    "mongoose": "^8.15.2",
+    "multer": "^1.4.4",
+    "multer-gridfs-storage": "^5.0.2"
+  }
+}
