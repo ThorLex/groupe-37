@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Demande = require('./demande.model');
+const Message = require('./message.model');
 
 // Créer une demande
 router.post('/', async (req, res) => {
@@ -32,6 +33,29 @@ router.post('/:id/status', async (req, res) => {
     res.json({ message: 'Statut mis à jour', demande });
   } catch (err) {
     res.status(400).json({ message: 'Erreur statut', error: err.message });
+  }
+});
+
+// Envoyer un message (admin -> user ou admin -> admin)
+router.post('/messages', async (req, res) => {
+  try {
+    const { from, to, content } = req.body;
+    if (!from || !to || !content) return res.status(400).json({ message: 'Champs manquants' });
+    const message = new Message({ from, to, content });
+    await message.save();
+    res.json({ message: 'Message envoyé', data: message });
+  } catch (err) {
+    res.status(400).json({ message: 'Erreur envoi message', error: err.message });
+  }
+});
+
+// Lister les messages reçus par un utilisateur
+router.get('/messages/:userId', async (req, res) => {
+  try {
+    const messages = await Message.find({ to: req.params.userId }).sort({ sentAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(400).json({ message: 'Erreur récupération messages', error: err.message });
   }
 });
 

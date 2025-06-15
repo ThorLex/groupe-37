@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('./user.model');
+const Message = require('./message.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -112,6 +113,29 @@ router.post('/me/documents', auth, async (req, res) => {
     res.json({ message: 'Document ajouté' });
   } catch (err) {
     res.status(400).json({ message: 'Erreur ajout document', error: err.message });
+  }
+});
+
+// Envoyer un message (user -> admin ou user -> user)
+router.post('/messages', async (req, res) => {
+  try {
+    const { from, to, content } = req.body;
+    if (!from || !to || !content) return res.status(400).json({ message: 'Champs manquants' });
+    const message = new Message({ from, to, content });
+    await message.save();
+    res.json({ message: 'Message envoyé', data: message });
+  } catch (err) {
+    res.status(400).json({ message: 'Erreur envoi message', error: err.message });
+  }
+});
+
+// Lister les messages reçus par un utilisateur
+router.get('/messages/:userId', async (req, res) => {
+  try {
+    const messages = await Message.find({ to: req.params.userId }).sort({ sentAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(400).json({ message: 'Erreur récupération messages', error: err.message });
   }
 });
 
