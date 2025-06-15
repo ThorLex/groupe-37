@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+  app:
+    build: .
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/app
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+volumes:
+  mongo_data:
