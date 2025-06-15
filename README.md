@@ -97,6 +97,36 @@ docker-compose up --build
 ```
 L’API sera disponible sur http://localhost:3000 (ou selon le port configuré)
 
+## Lancement de l'application
+
+### Environnement de développement (local)
+
+1. Installe les dépendances :
+   ```bash
+   npm install
+   ```
+2. Lance tous les microservices avec les variables d'environnement de développement :
+   ```bash
+   npm run local
+   ```
+   > Cela utilise le fichier `.env` pour la configuration.
+
+### Environnement de production (global)
+
+1. Installe les dépendances :
+   ```bash
+   npm install
+   ```
+2. Lance toute l'architecture (services + MongoDB) avec les variables de production :
+   ```bash
+   npm run prod
+   ```
+   > Cela utilise le fichier `.env.prod` pour la configuration.
+
+**Remarque :**
+- Assure-toi d'avoir bien configuré les fichiers `.env` et `.env.prod` à la racine du projet.
+- Pour la production, Docker Compose peut aussi être utilisé si besoin (`docker-compose up --build`).
+
 ## Sécurité & Qualité
 - Authentification JWT, rôles, guards
 - Validation stricte des entrées (express-validator)
