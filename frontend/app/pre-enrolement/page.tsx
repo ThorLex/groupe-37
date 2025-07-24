@@ -76,7 +76,7 @@ const stepFields: Array<Array<keyof PreEnrollData>> = [
 
 export default function PreEnrollmentPage() {
   const [stepIndex, setStepIndex] = useState(0)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const form = useForm<PreEnrollData>({
     resolver: zodResolver(PreEnrollSchema),
     mode: 'onBlur',
@@ -98,58 +98,22 @@ export default function PreEnrollmentPage() {
     if (stepIndex > 0) setStepIndex(stepIndex - 1);
   }
 
-  // const onSubmit = (data: PreEnrollData) => {
-  //   const output = {
-  //     ...data,
-  //     birthAct: data.birthAct
-  //       ? { name: data.birthAct.name, size: data.birthAct.size, type: data.birthAct.type }
-  //       : null,
-  //     nationalityCert: data.nationalityCert
-  //       ? { name: data.nationalityCert.name, size: data.nationalityCert.size, type: data.nationalityCert.type }
-  //       : null,
-  //     photo: data.photo
-  //       ? { name: data.photo.name, size: data.photo.size, type: data.photo.type }
-  //       : null,
-  //   }
-  //   console.log('✅ Données Pré-enrôlement :', JSON.stringify(output, null, 2))
-  //   setStepIndex(stepIndex + 1)
-  // }
-  const onSubmit = async (data: PreEnrollData) => {
-    setIsSubmitting(true); // Ajoutez un état de chargement
-
-    try {
-      const formData = new FormData();
-      
-      // Ajoutez tous les champs au FormData
-      Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof File) {
-          formData.append(key, value);
-        } else {
-          formData.append(key, String(value));
-        }
-      });
-
-      const response = await fetch('/api/preenroll/submit', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors de la soumission');
-      }
-
-      const result = await response.json();
-      console.log('Réponse du serveur:', result);
-      
-      // Passez à l'étape de confirmation après succès
-      setStepIndex(steps.length - 1);
-    } catch (error) {
-      console.error('Erreur:', error);
-      toast.error('Échec de la soumission. Veuillez réessayer.');
-    } finally {
-      setIsSubmitting(false);
+  const onSubmit = (data: PreEnrollData) => {
+    const output = {
+      ...data,
+      birthAct: data.birthAct
+        ? { name: data.birthAct.name, size: data.birthAct.size, type: data.birthAct.type }
+        : null,
+      nationalityCert: data.nationalityCert
+        ? { name: data.nationalityCert.name, size: data.nationalityCert.size, type: data.nationalityCert.type }
+        : null,
+      photo: data.photo
+        ? { name: data.photo.name, size: data.photo.size, type: data.photo.type }
+        : null,
     }
-  };
+    console.log('✅ Données Pré-enrôlement :', JSON.stringify(output, null, 2))
+    setStepIndex(stepIndex + 1)
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -179,9 +143,7 @@ export default function PreEnrollmentPage() {
                   Suivant
                 </NavButton>
               ) : (
-                <NavButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Envoi en cours...' : 'Valider'}
-                </NavButton>
+                <NavButton type="submit">Valider</NavButton>
               )}
             </div>
           </form>
