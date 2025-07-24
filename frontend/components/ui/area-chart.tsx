@@ -7,7 +7,7 @@ import {
   Area,
   XAxis,
   YAxis,
-  CartesianGrid,
+  // CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   Legend
@@ -33,7 +33,7 @@ export function AreaChartComponent({
         data={data}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
-        <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border} />
+        {/* <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border} /> */}
         <XAxis
           dataKey={index}
           stroke={theme.colors.border2}
@@ -52,6 +52,7 @@ export function AreaChartComponent({
             backgroundColor: theme.colors.card,
             borderColor: theme.colors.border,
             borderRadius: '8px',
+            color: theme.colors.text
           }}
         />
         <Legend />

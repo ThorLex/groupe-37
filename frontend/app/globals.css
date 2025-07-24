@@ -15,6 +15,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  transition: background-color 0.3s;
+  font-family: 'Inter', sans-serif;
 }
 
 .progress {
@@ -31,5 +33,11 @@ body {
   &:hover::after {
     width: 100%;
     background-color: white;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-gray-200 overflow-hidden;
   }
 }

@@ -4,7 +4,8 @@ export const theme = {
     secondary: "#00ff26",
     background: "#f9fafb",
     card: "#ffffff",
-    border: "#e5e7eb",
-    border2: "#000"
+    border: "#0000002a",
+    border2: "#fff",
+    text: "#00000064",
   }
 }
