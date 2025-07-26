@@ -1,4 +1,5 @@
 import { useFormContext } from 'react-hook-form'
+import CapitalizedInput from '../macro-element/CapitalizedInput'
 
 export default function AddressStep() {
     const {
@@ -7,20 +8,8 @@ export default function AddressStep() {
 
     return (
         <div className="space-y-4">
-            <div>
-                <label className="block">Ville de résidence</label>
-                <input
-                    {...register('city')}
-                    className="w-full px-4 py-2 border rounded"
-                />
-            </div>
-            <div>
-                <label className="block">Quartier</label>
-                <input
-                    {...register('neighborhood')}
-                    className="w-full px-4 py-2 border rounded"
-                />
-            </div>
+            <CapitalizedInput name='city' label='Ville de résidence' />
+            <CapitalizedInput name='neighborhood' label='Quartier' />
             <div>
                 <label className="block">Email</label>
                 <input
@@ -33,6 +22,7 @@ export default function AddressStep() {
                 <label className="block">Contact 1</label>
                 <input
                     type="tel"
+                    maxLength={9}
                     {...register('contact1')}
                     className="w-full px-4 py-2 border rounded"
                 />
@@ -41,6 +31,7 @@ export default function AddressStep() {
                 <label className="block">Contact 2 (optionnel)</label>
                 <input
                     type="tel"
+                    maxLength={9}
                     {...register('contact2')}
                     className="w-full px-4 py-2 border rounded"
                 />

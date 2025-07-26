@@ -3,6 +3,7 @@
 import { CheckCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function ConfirmationStep() {
   const router = useRouter()
@@ -26,14 +27,14 @@ export default function ConfirmationStep() {
           onClick={() => router.push('/')}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
         >
-          Accueil
+          <Link href="/">Accueil</Link>
         </button>
 
         <button
           onClick={restart}
           className="px-4 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition cursor-pointer"
         >
-          Nouveau pré-enrôlement
+          <Link href="/pre-enrolement">Nouveau pré-enrôlement</Link>
         </button>
       </div>
     </motion.div>
