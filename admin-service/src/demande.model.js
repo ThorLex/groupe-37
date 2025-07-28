@@ -6,6 +6,10 @@ const demandeSchema = new mongoose.Schema({
   rendezVous: { type: Date },
   documents: [{ type: mongoose.Schema.Types.ObjectId }],
   notes: { type: String },
+  agentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  validatedAt: { type: Date },
+  refusedAt: { type: Date },
+  adminNotes: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 module.exports = mongoose.model('Demande', demandeSchema);

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+  .container { width: 80%; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+  .header { background-color: #f4f4f4; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+  .content { padding: 20px 0; }
+  .footer { text-align: center; padding: 10px; font-size: 0.8em; color: #777; border-top: 1px solid #ddd; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Nouvelle Demande en Attente</h2>
+    </div>
+    <div class="content">
+      <p>Bonjour,</p>
+      <p>Une nouvelle demande a été soumise et nécessite votre attention.</p>
+      <ul>
+        <li><strong>ID de la demande :</strong> {{demandeId}}</li>
+        <li><strong>ID de l'utilisateur :</strong> {{userId}}</li>
+        <li><strong>Type de demande :</strong> {{demandeType}}</li>
+        {{#notes}}
+        <li><strong>Notes :</strong> {{notes}}</li>
+        {{/notes}}
+      </ul>
+      <p>Veuillez vous connecter au tableau de bord administrateur pour traiter cette demande.</p>
+      <p>Cordialement,</p>
+      <p>L'équipe de support</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{year}} Votre Entreprise. Tous droits réservés.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,29 +1,43 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
-const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
 
-const storage = new GridFsStorage({
-  url: process.env.MONGO_URI || 'mongodb://mongo:27017/file',
-  file: (req, file) => ({ filename: file.originalname })
+// Assurez-vous que le dossier 'uploads' existe
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
 });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+const upload = multer({ storage: storage });
 
 // Upload fichier
 router.post('/upload', upload.single('file'), (req, res) => {
-  res.json({ fileId: req.file.id, filename: req.file.filename });
+  if (!req.file) {
+    return res.status(400).json({ message: 'Aucun fichier fourni' });
+  }
+  res.json({ filename: req.file.filename, path: req.file.path });
 });
 
 // Télécharger un fichier
-router.get('/:id/download', async (req, res) => {
-  try {
-    const conn = mongoose.connection;
-    const gfs = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: 'fs' });
-    const fileId = new mongoose.Types.ObjectId(req.params.id);
-    gfs.openDownloadStream(fileId).pipe(res);
-  } catch (err) {
-    res.status(500).json({ message: 'Erreur téléchargement', error: err.message });
+router.get('/download/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadDir, filename);
+
+  if (fs.existsSync(filePath)) {
+    res.download(filePath);
+  } else {
+    res.status(404).json({ message: 'Fichier non trouvé' });
   }
 });
 
