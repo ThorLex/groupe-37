@@ -13,7 +13,6 @@ import NavButton from '@/components/macro-element/NavButton'
 import toast from 'react-hot-toast'
 import { PreEnrollSchema } from '@/types/preEnroll'
 import { Loader2 } from 'lucide-react'
-// import { Key } from 'lucide-react'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function showErrorsWithDelay(errors: { [key: string]: any }, fields: (keyof PreEnrollData)[]) {
@@ -82,22 +81,6 @@ export default function PreEnrollmentPage() {
     try {
       const formData = new FormData()
       
-      // Object.entries(data).forEach(([key, value]) => {
-      //   if (key === 'birthAct' || key === 'nationalityCert' || key === 'photo') {
-      //     formData.append(key, value)
-      //   }
-      // });
-
-      // if (data.birthAct) {
-      //   formData.append('birthAct', data.birthAct)
-      // }
-      // if (data.nationalityCert) {
-      //   formData.append('nationalityCert', data.nationalityCert)
-      // }
-      // if (data.photo) {
-      //   formData.append('photo', data.photo)
-      // }
-
       const fieldMappings: Record<string, string> = {
         firstName: 'firstname',
         lastName: 'lastname',

@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { resend } from '@/lib/supabase' // Assurez-vous que c'est le bon chemin
+import { resend } from '@/lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
 import { NextRequest, NextResponse } from 'next/server'
 import Busboy from 'busboy'
@@ -176,8 +176,7 @@ async function sendConfirmationEmail(
             return { success: false, error: errorMsg };
         }
 
-        // Utiliser un domaine vérifié
-        const verifiedDomain = "ivan-dev.me"; // Remplacez par votre domaine vérifié
+        const verifiedDomain = "ivan-dev.me";
         const from = `noreply@${verifiedDomain}`;
 
         const response = await resend.emails.send({

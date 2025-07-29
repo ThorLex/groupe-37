@@ -63,7 +63,7 @@ export default function BiometryPage() {
   const [search, setSearch] = useState("");
   const [selectedReq, setSelectedReq] = useState<Request | null>(null);
   const [requests, setRequests] = useState<Request[]>(mockRequests);
-  const [loading] = useState(false); // Simuler le chargement si nécessaire
+  const [loading] = useState(false);
 
   // Filtrer les demandes pour la date sélectionnée
   const filtered = useMemo(() => {

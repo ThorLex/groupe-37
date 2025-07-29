@@ -22,11 +22,11 @@ const StatusPage = () => {
   const [data, setData] = useState<StatusData | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [imageLoading, setImageLoading] = useState(true) // Nouvel état pour le chargement d'image
+  const [imageLoading, setImageLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    setImageLoading(true) // Réinitialiser l'état de chargement quand les données changent
+    setImageLoading(true)
   }, [data])
 
   const handleSearch = async (query: string) => {
