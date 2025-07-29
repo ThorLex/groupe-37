@@ -5,15 +5,18 @@ export type Document = {
   url: string;
 };
 
-export type Request = {
+export interface Request {
   id: string;
   fullName: string;
   cinNumber: string;
-  status: RequestStatus;
-  createdAt: string;
   birthDate: string;
   birthPlace: string;
+  createdAt: string;
   address: string;
   reason: string;
-  documents: Document[];
-};
+  status: "pending" | "approved" | "rejected";
+  biometryDate?: string;
+  biometryDone?: boolean;
+  documents: { type: string; url: string }[];
+  rejectionReason?: string;
+}

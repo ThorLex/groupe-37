@@ -11,6 +11,9 @@ import AttachmentsStep from '@/components/preenrol/AttachmentsStep'
 import ConfirmationStep from '@/components/preenrol/ConfirmationStep'
 import NavButton from '@/components/macro-element/NavButton'
 import toast from 'react-hot-toast'
+import { PreEnrollSchema } from '@/types/preEnroll'
+import { Loader2 } from 'lucide-react'
+// import { Key } from 'lucide-react'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function showErrorsWithDelay(errors: { [key: string]: any }, fields: (keyof PreEnrollData)[]) {
@@ -28,34 +31,6 @@ function showErrorsWithDelay(errors: { [key: string]: any }, fields: (keyof PreE
   })
 }
 
-const PreEnrollSchema = z.object({
-  firstName: z.string().min(1, 'Requis'),
-  lastName: z.string().min(1, 'Requis'),
-  birthDate: z.string().refine(val => Boolean(Date.parse(val)), 'Date invalide'),
-  profession: z.string().min(1, 'Requis'),
-  gender: z.enum(['M', 'F'], {
-    required_error: 'Requis',
-  }),
-  fatherName: z.string().min(1, 'Requis'),
-  motherName: z.string().min(1, 'Requis'),
-  city: z.string().min(1, 'Requis'),
-  neighborhood: z.string().min(1, 'Requis'),
-  email: z.string().email('Email invalide'),
-  contact1: z.string().min(8, 'Numéro invalide'),
-  contact2: z.string().optional(),
-  birthAct: z
-    .instanceof(File)
-    .refine(file => file?.type === 'application/pdf', { message: 'PDF requis' }),
-
-  nationalityCert: z
-    .instanceof(File)
-    .refine(file => file?.type === 'application/pdf', { message: 'PDF requis' }),
-
-  photo: z
-    .instanceof(File)
-    .refine(file => ['image/png', 'image/jpeg'].includes(file?.type), { message: 'Image requise (PNG/JPG)' }),
-})
-
 type PreEnrollData = z.infer<typeof PreEnrollSchema>
 
 const steps = [
@@ -68,7 +43,7 @@ const steps = [
 
 const stepFields: Array<Array<keyof PreEnrollData>> = [
   ['firstName', 'lastName', 'birthDate', 'profession', 'gender'],
-  ['fatherName', 'motherName'],
+  ['fatherName', 'fatherprofession', 'motherName', 'motherprofession'],
   ['city', 'neighborhood', 'email', 'contact1', 'contact2'],
   ['birthAct', 'nationalityCert', 'photo'],
   [],
@@ -76,6 +51,9 @@ const stepFields: Array<Array<keyof PreEnrollData>> = [
 
 export default function PreEnrollmentPage() {
   const [stepIndex, setStepIndex] = useState(0)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [idDemande, setIdDemande] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<PreEnrollData>({
     resolver: zodResolver(PreEnrollSchema),
@@ -98,21 +76,65 @@ export default function PreEnrollmentPage() {
     if (stepIndex > 0) setStepIndex(stepIndex - 1);
   }
 
-  const onSubmit = (data: PreEnrollData) => {
-    const output = {
-      ...data,
-      birthAct: data.birthAct
-        ? { name: data.birthAct.name, size: data.birthAct.size, type: data.birthAct.type }
-        : null,
-      nationalityCert: data.nationalityCert
-        ? { name: data.nationalityCert.name, size: data.nationalityCert.size, type: data.nationalityCert.type }
-        : null,
-      photo: data.photo
-        ? { name: data.photo.name, size: data.photo.size, type: data.photo.type }
-        : null,
+  const onSubmit = async (data: PreEnrollData) => {
+    setIsSubmitting(true)
+
+    try {
+      const formData = new FormData()
+      
+      // Object.entries(data).forEach(([key, value]) => {
+      //   if (key === 'birthAct' || key === 'nationalityCert' || key === 'photo') {
+      //     formData.append(key, value)
+      //   }
+      // });
+
+      // if (data.birthAct) {
+      //   formData.append('birthAct', data.birthAct)
+      // }
+      // if (data.nationalityCert) {
+      //   formData.append('nationalityCert', data.nationalityCert)
+      // }
+      // if (data.photo) {
+      //   formData.append('photo', data.photo)
+      // }
+
+      const fieldMappings: Record<string, string> = {
+        firstName: 'firstname',
+        lastName: 'lastname',
+        birthDate: 'birthdate',
+        gender: 'genre',
+        fatherprofession: 'father_profession',
+        motherprofession: 'mother_profession'
+      };
+
+      Object.entries(data).forEach(([key, value]) => {
+        const backendKey = fieldMappings[key] || key;
+        
+        if (value instanceof File) {
+          formData.append(backendKey, value);
+        } else if (value !== null && value !== undefined) {
+          formData.append(backendKey, String(value));
+        }
+      });
+
+      const response = await fetch('/api/preenroll', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setIdDemande(result.idDemande);
+        setStepIndex(stepIndex + 1);
+      } else {
+        throw new Error(result.error || 'Erreur lors de la soumission');
+      }
+    } catch (error) {
+      toast.error(`Erreur : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    } finally {
+      setIsSubmitting(false);
     }
-    console.log('✅ Données Pré-enrôlement :', JSON.stringify(output, null, 2))
-    setStepIndex(stepIndex + 1)
   }
 
   return (
@@ -143,7 +165,16 @@ export default function PreEnrollmentPage() {
                   Suivant
                 </NavButton>
               ) : (
-                <NavButton type="submit">Valider</NavButton>
+                <NavButton type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    "Valider"
+                  )}
+                </NavButton>
               )}
             </div>
           </form>
