@@ -12,13 +12,13 @@ export default function ClientWrapper({
   children: ReactNode
 }) {
   const pathname = usePathname()
-  const showNavbar = !pathname.startsWith("/admin")
+  const showNavbar = !pathname.startsWith("/admin") && !pathname.startsWith("/login")
 
   return (
     <>
       {showNavbar && <Navbar />}
-      <main className="flex-1">{children}</main>
-      <Toaster position="bottom-right" />
+        <main className="flex-1">{children}</main>
+        <Toaster position="bottom-right" />
       {showNavbar && <Footer />}
     </>
   )
