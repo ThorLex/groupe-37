@@ -8,7 +8,9 @@ app.use(bodyParser.json());
 const fileRoutes = require('./file.routes');
 app.use('/files', fileRoutes);
 app.get('/', (req, res) => res.send('File Service OK'));
-const PORT = process.env.PORT || 4004;
-mongoose.connect(process.env.MONGO_URI || 'mongodb://mongo:27017/file', { useNewUrlParser: true, useUnifiedTopology: true })
+const PORT = process.env.FILE_SERVICE_PORT || 4004;
+const MONGO_URI = `${process.env.MONGO_URI}/${process.env.FILE_DB_NAME}`;
+
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => app.listen(PORT, () => console.log('File Service sur port', PORT)))
   .catch(err => console.error('Erreur MongoDB:', err));

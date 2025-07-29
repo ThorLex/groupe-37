@@ -7,19 +7,17 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
 
   gateway-service:
-    build: .
+    build: ./gateway-service
     restart: always
     ports:
-      - "4000:4000"
-    environment:
-      - PORT=4000
-      - API_KEY=your_super_secret_api_key # Remplacez par une clé API forte
-      - USER_SERVICE_URL=http://user-service:4001
-      - ADMIN_SERVICE_URL=http://admin-service:4002
-      - PAYMENT_SERVICE_URL=http://payment-notification-service:4003
-      - FILE_SERVICE_URL=http://file-service:4004
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    env_file:
+      - .env
     depends_on:
       - user-service
       - admin-service
@@ -29,75 +27,52 @@ services:
       - app-network
 
   user-service:
-    build: .
+    build: ./user-service
     restart: always
-    command: node user-service/src/index.js
+    command: node src/index.js
     ports:
-      - "4001:4001"
-    environment:
-      - PORT=4001
-      - MONGO_URI=mongodb://mongo:27017/user
-      - JWT_SECRET=supersecret
-      - ADMIN_SERVICE_INTERNAL_API_KEY=your_internal_api_key_dev # ou prod
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+    env_file:
+      - .env
     depends_on:
       - mongo
     networks:
       - app-network
 
   admin-service:
-    build: .
+    build: ./admin-service
     restart: always
-    command: node admin-service/src/index.js
+    command: node src/index.js
     ports:
-      - "4002:4002"
-    environment:
-      - PORT=4002
-      - MONGO_URI=mongodb://mongo:27017/admin
-      - INTERNAL_API_KEY=your_internal_api_key_dev # ou prod
+      - "${ADMIN_SERVICE_PORT}:${ADMIN_SERVICE_PORT}"
+    env_file:
+      - .env
     depends_on:
       - mongo
     networks:
       - app-network
 
   payment-notification-service:
-    build: .
+    build: ./payment-notification-service
     restart: always
-    command: node payment-notification-service/src/index.js
+    command: node src/index.js
     ports:
-      - "4003:4003"
-    environment:
-      - PORT=4003
-      - MONGO_URI=mongodb://mongo:27017/payment
-      - TWILIO_ACCOUNT_SID=your_twilio_account_sid
-      - TWILIO_AUTH_TOKEN=your_twilio_auth_token
-      - TWILIO_PHONE_NUMBER=your_twilio_phone_number
-      - MOMO_CALLBACK_HOST=http://gateway-service:4000/payments/momo-callback # Exemple, à ajuster
-      - MOMO_ENVIRONMENT=sandbox # ou production
-      - MOMO_PRIMARY_KEY=your_momo_primary_key
-      - MOMO_SECONDARY_KEY=your_momo_secondary_key
-      - MOMO_USER_ID=your_momo_user_id
-      - MOMO_API_SECRET=your_momo_api_secret
-      - MOMO_CURRENCY=FCFA # ou XOF, USD, etc.
-      - EMAIL_HOST=smtp.mailtrap.io # ou votre hôte de production
-      - EMAIL_PORT=2525 # ou votre port de production
-      - EMAIL_SECURE=false # ou true pour production
-      - EMAIL_USER=your_mailtrap_username # ou votre utilisateur de production
-      - EMAIL_PASS=your_mailtrap_password # ou votre mot de passe de production
-      - EMAIL_FROM=noreply@yourdomain.com
+      - "${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}"
+    env_file:
+      - .env
     depends_on:
       - mongo
     networks:
       - app-network
 
   file-service:
-    build: .
+    build: ./file-service
     restart: always
-    command: node file-service/src/index.js
+    command: node src/index.js
     ports:
-      - "4004:4004"
-    environment:
-      - PORT=4004
-      - MONGO_URI=mongodb://mongo:27017/file
+      - "${FILE_SERVICE_PORT}:${FILE_SERVICE_PORT}"
+    env_file:
+      - .env
     depends_on:
       - mongo
     networks:

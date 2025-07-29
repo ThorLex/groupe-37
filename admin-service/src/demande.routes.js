@@ -1,18 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Demande = require('./demande.model');
-const Message = require('./message.model');
-const auth = require('./auth');
-const { sendEmail } = require('../../payment-notification-service/src/email.service'); // Import du service d'email
-const User = require('../../user-service/src/user.model'); // Pour récupérer l'email de l'utilisateur
+const Demande = require("./demande.model");
+const Message = require("./message.model");
+const auth = require("./auth");
+const {
+  sendEmail,
+} = require("../../payment-notification-service/src/email.service");
+const User = require("../../user-service/src/user.model");
 
 // Middleware pour la clé API interne
 const internalApiKeyAuth = (req, res, next) => {
-  const internalApiKey = req.headers['x-internal-api-key'];
+  const internalApiKey = req.headers["x-internal-api-key"];
   if (internalApiKey && internalApiKey === process.env.INTERNAL_API_KEY) {
     next();
   } else {
-    res.status(401).json({ message: 'Clé API interne non autorisée' });
+    res.status(401).json({ message: "Clé API interne non autorisée" });
   }
 };
 
@@ -53,7 +55,7 @@ const internalApiKeyAuth = (req, res, next) => {
  *       401:
  *         description: Unauthorized
  */
-router.post('/internal/demandes', internalApiKeyAuth, async (req, res) => {
+router.post("/internal/demandes", internalApiKeyAuth, async (req, res) => {
   try {
     const { userId, type, rendezVous, documents, notes } = req.body;
     const demande = new Demande({ userId, type, rendezVous, documents, notes });
@@ -65,21 +67,21 @@ router.post('/internal/demandes', internalApiKeyAuth, async (req, res) => {
     const agentsAvailable = false; // Simule la non-disponibilité d'agents
     if (!agentsAvailable) {
       sendEmail(
-        process.env.SUPPORT_EMAIL || 'support@example.com',
+        process.env.SUPPORT_EMAIL || "support@example.com",
         `Nouvelle demande en attente - ${demande._id}`,
-        'new_demande_notification', // Un nouveau template pour cette notification
+        "new_demande_notification", // Un nouveau template pour cette notification
         {
           demandeId: demande._id,
           userId: demande.userId,
           demandeType: demande.type,
-          notes: demande.notes || ''
+          notes: demande.notes || "",
         }
       );
     }
 
-    res.json({ message: 'Demande créée', demande });
+    res.json({ message: "Demande créée", demande });
   } catch (err) {
-    res.status(400).json({ message: 'Erreur création', error: err.message });
+    res.status(400).json({ message: "Erreur création", error: err.message });
   }
 });
 
@@ -124,7 +126,7 @@ router.post('/internal/demandes', internalApiKeyAuth, async (req, res) => {
  *       403:
  *         description: Forbidden
  */
-router.get('/', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
+router.get("/", auth(["agent", "admin", "superadmin"]), async (req, res) => {
   try {
     const { status, agentId, startDate, endDate } = req.query;
     const filter = {};
@@ -148,7 +150,9 @@ router.get('/', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
     const demandes = await Demande.find(filter);
     res.json(demandes);
   } catch (err) {
-    res.status(400).json({ message: 'Erreur récupération demandes', error: err.message });
+    res
+      .status(400)
+      .json({ message: "Erreur récupération demandes", error: err.message });
   }
 });
 
@@ -177,13 +181,16 @@ router.get('/', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
  *       404:
  *         description: Demand not found
  */
-router.get('/:id', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
+router.get("/:id", auth(["agent", "admin", "superadmin"]), async (req, res) => {
   try {
     const demande = await Demande.findById(req.params.id);
-    if (!demande) return res.status(404).json({ message: 'Demande non trouvée' });
+    if (!demande)
+      return res.status(404).json({ message: "Demande non trouvée" });
     res.json(demande);
   } catch (err) {
-    res.status(400).json({ message: 'Erreur récupération demande', error: err.message });
+    res
+      .status(400)
+      .json({ message: "Erreur récupération demande", error: err.message });
   }
 });
 
@@ -224,46 +231,54 @@ router.get('/:id', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
  *       404:
  *         description: Demand not found
  */
-router.post('/:id/status', auth(['agent', 'admin', 'superadmin']), async (req, res) => {
-  try {
-    const { status, notes } = req.body;
-    const demande = await Demande.findById(req.params.id);
-    if (!demande) return res.status(404).json({ message: 'Demande non trouvée' });
+router.post(
+  "/:id/status",
+  auth(["agent", "admin", "superadmin"]),
+  async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      const demande = await Demande.findById(req.params.id);
+      if (!demande)
+        return res.status(404).json({ message: "Demande non trouvée" });
 
-    demande.status = status;
-    demande.adminNotes = notes;
-    demande.agentId = req.user.userId; // L'ID de l'agent qui traite la demande
+      demande.status = status;
+      demande.adminNotes = notes;
+      demande.agentId = req.user.userId; // L'ID de l'agent qui traite la demande
 
-    if (status === 'VALIDEE') {
-      demande.validatedAt = new Date();
-      demande.refusedAt = undefined; // S'assurer que refusedAt est vide si validée
-    } else if (status === 'REFUSEE') {
-      demande.refusedAt = new Date();
-      demande.validatedAt = undefined; // S'assurer que validatedAt est vide si refusée
+      if (status === "VALIDEE") {
+        demande.validatedAt = new Date();
+        demande.refusedAt = undefined; // S'assurer que refusedAt est vide si validée
+      } else if (status === "REFUSEE") {
+        demande.refusedAt = new Date();
+        demande.validatedAt = undefined; // S'assurer que validatedAt est vide si refusée
+      }
+
+      await demande.save();
+
+      // Envoyer un email à l'utilisateur
+      const user = await User.findById(demande.userId);
+      if (user && user.email) {
+        sendEmail(
+          user.email,
+          `Mise à jour du statut de votre demande - ${status}`,
+          "demande_status",
+          {
+            userName:
+              user.profile && user.profile.prenom
+                ? user.profile.prenom
+                : user.email,
+            demandeType: demande.type,
+            newStatus: status,
+            notes: notes || "",
+          }
+        );
+      }
+
+      res.json({ message: "Statut mis à jour", demande });
+    } catch (err) {
+      res.status(400).json({ message: "Erreur statut", error: err.message });
     }
-
-    await demande.save();
-
-    // Envoyer un email à l'utilisateur
-    const user = await User.findById(demande.userId);
-    if (user && user.email) {
-      sendEmail(
-        user.email,
-        `Mise à jour du statut de votre demande - ${status}`,
-        'demande_status',
-        {
-          userName: user.profile && user.profile.prenom ? user.profile.prenom : user.email,
-          demandeType: demande.type,
-          newStatus: status,
-          notes: notes || ''
-        }
-      );
-    }
-
-    res.json({ message: 'Statut mis à jour', demande });
-  } catch (err) {
-    res.status(400).json({ message: 'Erreur statut', error: err.message });
   }
-});
+);
 
 module.exports = router;

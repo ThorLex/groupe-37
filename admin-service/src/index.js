@@ -18,7 +18,9 @@ app.use('/demandes', demandeRoutes);
 const adminRoutes = require('./admin.routes');
 app.use('/admin', adminRoutes); // Nouvelle route pour les fonctionnalités admin/superadmin
 
-const PORT = process.env.PORT || 4003;
-mongoose.connect(process.env.MONGO_URI || 'mongodb://mongo:27017/admin', { useNewUrlParser: true, useUnifiedTopology: true })
+const PORT = process.env.ADMIN_SERVICE_PORT || 4002;
+const MONGO_URI = `${process.env.MONGO_URI}/${process.env.ADMIN_DB_NAME}`;
+
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => app.listen(PORT, () => console.log('Admin Service sur port', PORT)))
   .catch(err => console.error('Erreur MongoDB:', err));
