@@ -1,13 +1,12 @@
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const httpProxy = require("express-http-proxy");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const fetch = require("node-fetch");
-const rateLimit = require("express-rate-limit");
 
 const app = express();
-const PORT = process.env.GATEWAY_PORT || 4000;
+const PORT = process.env.PORT || 4000;
 const API_KEY = process.env.API_KEY || "your-secret-api-key";
 const PING_TIMEOUT = 5000; // 5 secondes
 
@@ -60,17 +59,9 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("combined"));
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
-
 const authenticateRequest = (req, res, next) => {
   const apiKey = req.headers["x-api-key"];
-  if (req.path === "/health" || req.path.startsWith("/api/docs")) {
+  if (req.path === "/health" || req.path.startsWith("/api-docs")) {
     return next();
   }
 
@@ -164,114 +155,60 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Configuration des proxies pour chaque service avec http-proxy-middleware
+// Configuration des proxies pour chaque service
 services.forEach((service) => {
   console.log(
     `Setting up proxy for ${service.name}: ${service.apiPath} -> ${service.url}`
   );
 
   // Proxy pour les routes API v1
-  const apiProxy = createProxyMiddleware({
-    target: service.url,
-    changeOrigin: true,
-    timeout: service.timeout,
-    pathRewrite: {
-      [`^${service.apiPath}`]: service.path, // Remplace /api/v1/servicename par /servicename
-    },
-
-    // Gestion des requêtes sortantes
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(
-        `[${service.name.toUpperCase()}] Proxying: ${req.method} ${
-          req.originalUrl
-        } -> ${service.url}${service.path}${req.url.replace(
-          service.apiPath,
-          ""
-        )}`
-      );
-
-      // Ajout des headers nécessaires
-      proxyReq.setHeader("x-api-key", API_KEY);
-      proxyReq.setHeader("x-forwarded-for", req.ip);
-      proxyReq.setHeader("x-forwarded-host", req.get("host"));
-
-      // Gestion du body pour les requêtes POST/PUT
-      if (req.body && Object.keys(req.body).length > 0) {
-        const bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader("Content-Type", "application/json");
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
-      }
-    },
-
-    // Gestion des réponses
-    onProxyRes: (proxyRes, req, res) => {
-      console.log(
-        `[${service.name.toUpperCase()}] Response: ${proxyRes.statusCode} for ${
-          req.method
-        } ${req.originalUrl}`
-      );
-
-      // Ajout des headers CORS si nécessaire
-      proxyRes.headers["Access-Control-Allow-Origin"] =
-        process.env.CORS_ORIGIN || "*";
-      proxyRes.headers["Access-Control-Allow-Credentials"] = "true";
-    },
-
-    // Gestion des erreurs
-    onError: (err, req, res) => {
-      console.error(
-        `[${service.name.toUpperCase()}] Proxy error:`,
-        err.message
-      );
-      if (!res.headersSent) {
-        res.status(502).json({
-          error: "Service Unavailable",
-          message: `Unable to reach ${service.name} service`,
-          service: service.name,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    },
-
-    logLevel: process.env.NODE_ENV === "development" ? "debug" : "warn",
-  });
-
-  app.use(service.apiPath, apiProxy);
+  app.use(
+    service.apiPath,
+    httpProxy(service.url, {
+      timeout: service.timeout,
+      proxyReqPathResolver: (req) => {
+        // Retire /api/v1/servicename du path et le redirige vers le service
+        const newPath = req.url.replace(service.apiPath, service.path);
+        console.log(
+          `[${service.name.toUpperCase()}] Proxying: ${req.originalUrl} -> ${
+            service.url
+          }${newPath}`
+        );
+        return newPath;
+      },
+      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        // Transmet les headers importants
+        proxyReqOpts.headers["x-api-key"] = API_KEY;
+        proxyReqOpts.headers["x-forwarded-for"] = srcReq.ip;
+        proxyReqOpts.headers["x-forwarded-host"] = srcReq.get("host");
+        return proxyReqOpts;
+      },
+      userResDecorator: (proxyRes, proxyResData, userReq, userRes) => {
+        // Log des réponses
+        console.log(
+          `[${service.name.toUpperCase()}] Response: ${proxyRes.statusCode}`
+        );
+        return proxyResData;
+      },
+    })
+  );
 
   // Proxy pour la documentation Swagger de chaque service
-  const docsProxy = createProxyMiddleware({
-    target: service.url,
-    changeOrigin: true,
-    timeout: service.timeout,
-    pathRewrite: {
-      [`^/api/docs/${service.name}`]: "/api/docs", // Redirige vers /api-docs du service
-    },
-
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(
-        `[${service.name.toUpperCase()}] Swagger docs: ${req.originalUrl} -> ${
-          service.url
-        }/api/docs`
-      );
-    },
-
-    onError: (err, req, res) => {
-      console.error(
-        `[${service.name.toUpperCase()}] Docs proxy error:`,
-        err.message
-      );
-      if (!res.headersSent) {
-        res.status(502).json({
-          error: "Documentation Unavailable",
-          message: `Unable to reach ${service.name} documentation`,
-          service: service.name,
-        });
-      }
-    },
-  });
-
-  app.use(`/api/docs/${service.name}`, docsProxy);
+  app.use(
+    `/api-docs/${service.name}`,
+    httpProxy(service.url, {
+      timeout: service.timeout,
+      proxyReqPathResolver: (req) => {
+        const newPath = `/api-docs${req.url}`;
+        console.log(
+          `[${service.name.toUpperCase()}] Swagger docs: ${
+            req.originalUrl
+          } -> ${service.url}${newPath}`
+        );
+        return newPath;
+      },
+    })
+  );
 });
 
 // Route pour lister tous les services disponibles
@@ -279,7 +216,7 @@ app.get("/api/v1/services", (req, res) => {
   const servicesList = services.map((service) => ({
     name: service.name,
     apiPath: service.apiPath,
-    docsPath: `/api/docs/${service.name}`,
+    docsPath: `/api-docs/${service.name}`,
     healthCheck: `${service.apiPath}/ping`,
   }));
 
@@ -301,17 +238,17 @@ app.get("/", (req, res) => {
     endpoints: {
       health: "/health",
       services: "/api/v1/services",
-      docs: "/api/docs",
+      docs: "/api-docs",
     },
     services: services.map((s) => s.apiPath),
   });
 });
 
 // Documentation Swagger globale
-app.get("/api/docs", (req, res) => {
+app.get("/api-docs", (req, res) => {
   const docsLinks = services.map((service) => ({
     service: service.name,
-    docs: `${req.protocol}://${req.get("host")}/api/docs/${service.name}`,
+    docs: `${req.protocol}://${req.get("host")}/api-docs/${service.name}`,
   }));
 
   res.json({
@@ -320,26 +257,9 @@ app.get("/api/docs", (req, res) => {
   });
 });
 
-// Gestion des requêtes OPTIONS pour CORS
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, x-api-key"
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
-});
-
 // Middleware de gestion d'erreurs global
 app.use((err, req, res, next) => {
   console.error("Gateway error:", err);
-
-  // Ajout des headers CORS même en cas d'erreur
-  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
-  res.header("Access-Control-Allow-Credentials", "true");
-
   res.status(500).json({
     error: "Internal Gateway Error",
     message: err.message,
@@ -353,44 +273,29 @@ app.use("*", (req, res) => {
     error: "Route not found",
     message: `The requested route ${req.originalUrl} was not found`,
     availableServices: services.map((s) => s.apiPath),
-    timestamp: new Date().toISOString(),
   });
 });
-
-// Gestion gracieuse de l'arrêt
-const gracefulShutdown = (signal) => {
-  console.log(`\nReceived ${signal}. Starting graceful shutdown...`);
-  setTimeout(() => {
-    console.log("Gateway shutdown complete");
-    process.exit(0);
-  }, 5000);
-};
-
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 // Démarrage du serveur
 const startServer = () => {
   app.listen(PORT, async () => {
-    console.log(`🚀 API Gateway running on port ${PORT}`);
+    console.log(` API Gateway running on port ${PORT}`);
+    console.log(` Health check available at: http://localhost:${PORT}/health`);
+    console.log(`📚 API docs available at: http://localhost:${PORT}/api-docs`);
     console.log(
-      `🏥 Health check available at: http://localhost:${PORT}/health`
-    );
-    console.log(`📚 API docs available at: http://localhost:${PORT}/api/docs`);
-    console.log(
-      `📋 Services list available at: http://localhost:${PORT}/api/v1/services`
+      `Services list available at: http://localhost:${PORT}/api/v1/services`
     );
 
     // Ping initial des services
     console.log("\n🔍 Checking services health...");
     const checks = await Promise.all(services.map(pingService));
     checks.forEach((check) => {
-      const status = check.status === "up" ? "✅ UP" : "❌ DOWN";
+      const status = check.status === "up" ? "✅" : "❌";
       console.log(
         `${status} ${check.name}: ${check.status} (${check.responseTime}ms)`
       );
     });
-    console.log("\n⚡ Ready to proxy requests!\n");
+    console.log("\n");
   });
 };
 

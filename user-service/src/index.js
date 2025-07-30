@@ -9,8 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 const userRoutes = require("./user.routes");
-app.use("/users", userRoutes);
-app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/", userRoutes);
 const PORT = process.env.USER_SERVICE_PORT || 4001;
 const MONGO_URI = `${process.env.MONGO_URI}/${process.env.USER_DB_NAME}`;
 
