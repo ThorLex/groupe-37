@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
       lastName: data.lastname,
       initiationDate: formatDate(data.initiationdate),
       biometricDate: formatDate(data.biometricdate),
-      biometricPass: data.biometric_pass,
+      biometricPass: data.biometric_pass?.toString() || null,
       locationCNI: data.locationcni,
       rejectionReason: data.rejection_reason,
       status: data.status,

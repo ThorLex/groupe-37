@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,45 +16,66 @@ import { isSameDay, parseISO } from "date-fns";
 const mockRequests: Request[] = [
   {
     id: "1",
-    fullName: "Jean Dupont",
-    cinNumber: "AB123456",
+    fullName: "Pierre Durand",
+    cinNumber: "EF345678",
     status: "approved",
-    biometryDate: new Date(2023, 10, 15).toISOString(),
-    biometryDone: false,
-    createdAt: new Date(2023, 9, 1).toISOString(),
-    birthDate: new Date(1990, 5, 20).toISOString(),
-    birthPlace: "Paris",
-    address: "123 Rue de Paris, 75000 Paris",
+    biometricdate: new Date(2025, 6, 29).toISOString(),
+    biometric_passed: false,
+    createdAt: new Date(2025, 6, 29).toISOString(),
+    birthdate: new Date(1978, 11, 5).toISOString(),
+    city: "Marseille",
+    neighborhood: "78 Boulevard du Sud, 13000 Marseille",
     reason: "Renouvellement",
     documents: [],
+    fathername: "Jean Durand",
+    father_profession: "Ingénieur",
+    mothername: "Sophie Durand",
+    mother_profession: "Professeur",
+    genre: "M",
+    contact1: "666666666",
+    profession: "Médecin",
   },
   {
     id: "2",
-    fullName: "Marie Martin",
-    cinNumber: "CD789012",
+    fullName: "Pierre Durand",
+    cinNumber: "EF345678",
     status: "approved",
-    biometryDate: new Date(2023, 10, 15).toISOString(),
-    biometryDone: false,
-    createdAt: new Date(2023, 9, 2).toISOString(),
-    birthDate: new Date(1985, 3, 10).toISOString(),
-    birthPlace: "Lyon",
-    address: "45 Avenue des Fleurs, 69000 Lyon",
-    reason: "Première demande",
+    biometricdate: new Date(2025, 6, 29).toISOString(),
+    biometric_passed: false,
+    createdAt: new Date(2025, 6, 29).toISOString(),
+    birthdate: new Date(1978, 11, 5).toISOString(),
+    city: "Marseille",
+    neighborhood: "78 Boulevard du Sud, 13000 Marseille",
+    reason: "Renouvellement",
     documents: [],
+    fathername: "Jean Durand",
+    father_profession: "Ingénieur",
+    mothername: "Sophie Durand",
+    mother_profession: "Professeur",
+    genre: "M",
+    contact1: "666666666",
+    profession: "Médecin",
   },
   {
     id: "3",
     fullName: "Pierre Durand",
     cinNumber: "EF345678",
     status: "approved",
-    biometryDate: new Date(2025, 6, 29).toISOString(),
-    biometryDone: false,
+    biometricdate: new Date(2025, 6, 29).toISOString(),
+    biometric_passed: false,
     createdAt: new Date(2025, 6, 29).toISOString(),
-    birthDate: new Date(1978, 11, 5).toISOString(),
-    birthPlace: "Marseille",
-    address: "78 Boulevard du Sud, 13000 Marseille",
+    birthdate: new Date(1978, 11, 5).toISOString(),
+    city: "Marseille",
+    neighborhood: "78 Boulevard du Sud, 13000 Marseille",
     reason: "Renouvellement",
     documents: [],
+    fathername: "Jean Durand",
+    father_profession: "Ingénieur",
+    mothername: "Sophie Durand",
+    mother_profession: "Professeur",
+    genre: "M",
+    contact1: "666666666",
+    profession: "Médecin",
   },
 ];
 
@@ -63,7 +84,9 @@ export default function BiometryPage() {
   const [search, setSearch] = useState("");
   const [selectedReq, setSelectedReq] = useState<Request | null>(null);
   const [requests, setRequests] = useState<Request[]>(mockRequests);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
 
   // Filtrer les demandes pour la date sélectionnée
   const filtered = useMemo(() => {
@@ -72,16 +95,54 @@ export default function BiometryPage() {
         (r.fullName.toLowerCase().includes(search.toLowerCase()) ||
          r.cinNumber.includes(search)) &&
         r.status === "approved" &&
-        r.biometryDate && isSameDay(parseISO(r.biometryDate), selectedDate)
+        r.biometricdate && isSameDay(parseISO(r.biometricdate), selectedDate)
     );
   }, [requests, search, selectedDate]);
 
+  // Charger les données
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        const res = await fetch(`/api/biometry?date=${dateStr}`);
+        
+        if (!res.ok) throw new Error('Erreur de chargement des données');
+        
+        const data = await res.json();
+        setRequests(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedDate]);
+
   // Valider la biométrie
-  const handleValidateBiometry = (id: string) => {
-    setRequests(prev => prev.map(req => 
-      req.id === id ? {...req, biometryDone: true } : req
-    ));
-    setSelectedReq(null);
+  const handleValidateBiometry = async (id: string) => {
+    try {
+      const res = await fetch('/api/biometry', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+
+      if (!res.ok) throw new Error('Échec de validation');
+
+      // Mettre à jour l'état local
+      setRequests(prev => prev.map(req => 
+        req.id === id ? { ...req, biometric_passed: true } : req
+      ));
+      setSelectedReq(null);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la validation de la biométrie");
+    }
   };
 
   return (
@@ -100,6 +161,8 @@ export default function BiometryPage() {
           <DatePicker
             date={selectedDate}
             onChange={(d) => d && setSelectedDate(d)}
+            futureDisabled={true}
+            disablePast={false}
           />
         </div>
       </div>

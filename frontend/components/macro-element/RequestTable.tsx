@@ -15,7 +15,7 @@ export const RequestTable = ({ requests, selectedId, onSelect }: RequestTablePro
     <table className="min-w-full">
       <thead className="bg-slate-800">
         <tr>
-          {["ID", "Nom", "CIN", "Statut", "Actions"].map((h) => (
+          {["ID", "Nom", " ", "Statut", "Actions"].map((h) => (
             <th
               key={h}
               className="py-3 px-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"

@@ -87,50 +87,97 @@
 // };
 
 
+// import { useState, useEffect, useCallback } from "react";
+// import { Request } from "./types";
+
+// export const useRequests = (date: Date) => {
+//   const [data, setData] = useState<Request[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const updateRequest = useCallback((id: string, updates: Partial<Request>) => {
+//     setData(prev => prev.map(req => 
+//       req.id === id ? { ...req, ...updates } : req
+//     ));
+//   }, []);
+
+//   useEffect(() => {
+//     let mounted = true;
+//     setLoading(true);
+
+//     setTimeout(() => {
+//       if (!mounted) return;
+//       setData([
+//         {
+//           id: 'CNI-20230618-001',
+//           fullName: 'Jean Dupont',
+//           cinNumber: '12345678',
+//           status: 'pending',
+//           createdAt: '2023-06-18T09:30:00Z',
+//           birthDate: '1985-05-15',
+//           birthPlace: 'Paris',
+//           address: '12 Rue de la République, 75001 Paris',
+//           reason: 'Première demande',
+//           documents: [
+//             { type: 'Photo d\'identité', url: '/documents/photo.jpg' },
+//             { type: 'Justificatif de domicile', url: '/documents/proof.pdf' }
+//           ]
+//         },
+//         // ... autres demandes
+//       ]);
+//       setLoading(false);
+//     }, 800);
+
+//     return () => {
+//       mounted = false;
+//     };
+//   }, [date]);
+
+//   return { data, loading, updateRequest };
+// };
+
+
+// utils/useRequests.ts
 import { useState, useEffect, useCallback } from "react";
 import { Request } from "./types";
 
-export const useRequests = (date: Date) => {
-  const [data, setData] = useState<Request[]>([]);
+export function useRequests(selectedDate: Date) {
+  const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const updateRequest = useCallback((id: string, updates: Partial<Request>) => {
-    setData(prev => prev.map(req => 
-      req.id === id ? { ...req, ...updates } : req
-    ));
+  const fetchRequests = useCallback(async () => {
+    setLoading(true);
+    try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const res = await fetch(`/api/requests?date=${dateStr}`);
+      const data = await res.json();
+      setRequests(data);
+    } catch (error) {
+      console.error('Failed to fetch requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedDate]);
+  const updateRequest = useCallback(async (id: string, updates: Partial<Request>) => {
+    try {
+      const res = await fetch('/api/requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates })
+      });
+      
+      if (res.ok) {
+        setRequests(prev => 
+          prev.map((req: Request) => req.id === id ? { ...req, ...updates } : req)
+        );
+      }
+    } catch (error) {
+      console.error('Failed to update request:', error);
+    }
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
+    fetchRequests();
+  }, [fetchRequests]);
 
-    setTimeout(() => {
-      if (!mounted) return;
-      setData([
-        {
-          id: 'CNI-20230618-001',
-          fullName: 'Jean Dupont',
-          cinNumber: '12345678',
-          status: 'pending',
-          createdAt: '2023-06-18T09:30:00Z',
-          birthDate: '1985-05-15',
-          birthPlace: 'Paris',
-          address: '12 Rue de la République, 75001 Paris',
-          reason: 'Première demande',
-          documents: [
-            { type: 'Photo d\'identité', url: '/documents/photo.jpg' },
-            { type: 'Justificatif de domicile', url: '/documents/proof.pdf' }
-          ]
-        },
-        // ... autres demandes
-      ]);
-      setLoading(false);
-    }, 800);
-
-    return () => {
-      mounted = false;
-    };
-  }, [date]);
-
-  return { data, loading, updateRequest };
-};
+  return { data: requests, loading, updateRequest };
+}

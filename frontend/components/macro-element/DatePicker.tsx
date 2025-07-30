@@ -66,11 +66,13 @@ const darkTheme = createTheme({
     });
 
     interface DatePickerProps {
-    date: Date;
-    onChange: (d: Date | null) => void;
+        date: Date;
+        onChange: (d: Date | null) => void;
+        futureDisabled?: boolean;
+        disablePast?: boolean;
     }
 
-    export const DatePicker = ({ date, onChange }: DatePickerProps) => {
+    export const DatePicker = ({ date, onChange, futureDisabled, disablePast }: DatePickerProps) => {
     return (
         <ThemeProvider theme={darkTheme}>
         <LocalizationProvider
@@ -82,7 +84,8 @@ const darkTheme = createTheme({
             onChange={onChange}
             format="dd/MM/yyyy"
             enableAccessibleFieldDOMStructure={false}
-            disableFuture
+            disableFuture={futureDisabled}
+            disablePast={disablePast}
             slots={{
                 textField: (params) => (
                 <TextField

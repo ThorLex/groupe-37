@@ -8,21 +8,21 @@ const columns: ColumnDef<Request>[] = [
     header: "Nom Complet",
   },
   {
-    accessorKey: "cinNumber",
-    header: "CIN",
+    accessorKey: "iddemande",
+    header: "ID Demande",
   },
   {
-    accessorKey: "biometryDate",
+    accessorKey: "biometricdate",
     header: "Date Biométrie",
     cell: ({ row }) => 
-      row.original.biometryDate 
-        ? new Date(row.original.biometryDate).toLocaleDateString("fr-FR") 
+      row.original.biometricdate 
+        ? new Date(row.original.biometricdate).toLocaleDateString("fr-FR") 
         : "Non planifié"
   },
   {
-    accessorKey: "biometryDone",
-    header: "Statut",
-    cell: ({ row }) => row.original.biometryDone ? "✅ Effectué" : "⏱ En attente"
+    accessorKey: "biometric_passed",
+    header: "Statut Biométrie",
+    cell: ({ row }) => row.original.biometric_passed ? "✅ Effectué" : "⏱ En attente"
   },
 ];
 

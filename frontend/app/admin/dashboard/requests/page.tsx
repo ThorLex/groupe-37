@@ -34,10 +34,10 @@ export default function RequestPage() {
 
   const handleSelect = useCallback((r: Request) => setSelectedReq(r), []);
 
-  const handleApprove = useCallback((id: string, biometryDate: Date) => {
+  const handleApprove = useCallback((id: string, biometricdate: Date) => {
     updateRequest(id, { 
       status: "approved", 
-      biometryDate: biometryDate.toISOString() 
+      biometricdate: biometricdate.toISOString() 
     });
     setSelectedReq(null);
   }, [updateRequest]);
@@ -45,7 +45,7 @@ export default function RequestPage() {
   const handleReject = useCallback((id: string, reason: string) => {
     updateRequest(id, { 
       status: "rejected", 
-      rejectionReason: reason 
+      rejection_reason: reason 
     });
     setSelectedReq(null);
   }, [updateRequest]);
@@ -70,6 +70,8 @@ export default function RequestPage() {
               onChange={(d) => {
                 if (d) setSelectedDate(d);
               }}
+              futureDisabled={true}
+              disablePast={false}
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import SearchBar from '@/components/macro-element/SearchBar'
 
@@ -23,7 +23,7 @@ const StatusPage = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [imageLoading, setImageLoading] = useState(true)
-  const router = useRouter()
+  // const router = useRouter()
 
   useEffect(() => {
     setImageLoading(true)
@@ -57,7 +57,8 @@ const StatusPage = () => {
       case 'rejected': return 'bg-red-100 text-red-800'
       case 'available': return 'bg-blue-100 text-blue-800'
       case 'pending': return 'bg-yellow-100 text-yellow-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'completed': return 'bg-green-100 text-green-800' // Changé pour vert
+      default: return 'bg-gray-100 text-gray-800' // Changé pour gris
     }
   }
 
@@ -171,17 +172,16 @@ const StatusPage = () => {
             <div className="mt-6 flex justify-between items-center">
               {data.biometricPass && (
                 <div>
-                  <span className="font-semibold">Statut biométrie:</span>
+                  <span className="font-semibold text-black">Statut biométrie:</span>
                   <span className="ml-2 font-bold">
-                    {data.biometricPass === 'pending' && '⏳ En attente'}
-                    {data.biometricPass === 'passed' && '✅ Réussie'}
-                    {data.biometricPass === 'not assignable' && '❌ Non programmée'}
+                    {String(data.biometricPass).toLowerCase() === 'false' && <span className="text-amber-500">⏳ En attente</span>}
+                    {String(data.biometricPass).toLowerCase() === 'true' && <span className="text-green-500">✅ Réussie</span>}
                   </span>
                 </div>
               )}
               
               <div>
-                <span className="font-semibold">Statut demande:</span>
+                <span className="font-semibold text-black">Statut demande:</span>
                 <span className={`ml-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(data.status)}`}>
                   {translateStatus(data.status)}
                 </span>
@@ -200,14 +200,14 @@ const StatusPage = () => {
         </div>
       </main>
       
-      <div className="text-center mt-6">
+      {/* <div className="text-center mt-6">
         <button 
           onClick={() => router.push('/pre-enrolement')}
           className="text-indigo-600 hover:text-indigo-800 font-medium text-lg"
         >
           Faire une nouvelle demande
         </button>
-      </div>
+      </div> */}
     </div>
   )
 }

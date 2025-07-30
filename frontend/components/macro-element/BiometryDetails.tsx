@@ -33,18 +33,18 @@ export function BiometryDetails({
         <DetailItem 
           label="Date prévue" 
           value={
-            request.biometryDate 
-              ? new Date(request.biometryDate).toLocaleString("fr-FR")
+            request.biometricdate 
+              ? new Date(request.biometricdate).toLocaleString("fr-FR")
               : "Non spécifiée"
           } 
         />
         <DetailItem 
           label="Statut" 
-          value={request.biometryDone ? "✅ Effectuée" : "⏱ En attente"} 
+          value={request.biometric_passed ? "✅ Effectuée" : "⏱ En attente"} 
         />
       </div>
 
-      {!request.biometryDone && (
+      {!request.biometric_passed && (
         <Button
           onClick={() => onValidate(request.id)}
           className="bg-green-600 hover:bg-green-700 w-full"
