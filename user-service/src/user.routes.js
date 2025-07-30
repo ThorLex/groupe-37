@@ -72,9 +72,7 @@ router.post("/register", async (req, res) => {
  *       401:
  *         description: Unauthorized
  */
-const passerelle = http://localhost:4000
-const apservice = /api/v1 / users"
-   const route = paserrelle/apiservice/login
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
