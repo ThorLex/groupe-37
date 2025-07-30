@@ -29,7 +29,7 @@ export async function sendStatusUpdateEmail(
       return { success: true };
     }
 
-    const verifiedDomain = "ivan-dev.me";
+    const verifiedDomain = "idExpress.com";
     const from = `noreply@${verifiedDomain}`;
 
     const response = await resend.emails.send({
