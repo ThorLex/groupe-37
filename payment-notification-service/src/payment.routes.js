@@ -11,6 +11,7 @@ router.post("/initiate", async (req, res) => {
     const payment = new Payment({
       userId,
       amount,
+      phoneNumber,
       provider,
       status: "pending",
     });
@@ -21,7 +22,7 @@ router.post("/initiate", async (req, res) => {
       .create({
         body: `Votre paiement de ${amount} a été initié.`,
         from: process.env.TWILIO_PHONE_NUMBER,
-        to: "+237693100855",
+        to: phoneNumber,
       })
       .then((message) => console.log(message.sid))
       .catch((err) => console.error(err));

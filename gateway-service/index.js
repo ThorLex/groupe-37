@@ -65,13 +65,13 @@ const authenticateRequest = (req, res, next) => {
     return next();
   }
 
-  // if (!apiKey || apiKey !== API_KEY) {
-  //   console.warn(`Unauthorized access attempt from ${req.ip} to ${req.path}`);
-  //   return res.status(401).json({
-  //     error: "Unauthorized",
-  //     message: "Valid x-api-key header required",
-  //   });
-  // }
+  if (!apiKey || apiKey !== API_KEY) {
+    console.warn(`Unauthorized access attempt from ${req.ip} to ${req.path}`);
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Valid x-api-key header required",
+    });
+  }
 
   next();
 };
